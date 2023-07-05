@@ -13,54 +13,18 @@ MAX_REQUESTS = 90  # Maximum number of requests allowed per minute
 API_ERR = []
 ERR = []
 
-def json_to_csv(json_data, csv_file):
-    # Extract field names from the first item
-    field_names = list(json_data.keys())
-    file_exists = os.path.isfile(csv_file)
+def add_to_json(json_obj, file):
+    # Convert the JSON object to a string
+    json_string = json.dumps(json_obj)
+    # Open the file in append mode and write the JSON object
+    with open(file, 'a') as file:
+        file.write(json_string + '\n')
+    
+    print("Added to file.")
 
-    # Open CSV file in write mode
-    with open(csv_file, "a", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=field_names)
 
-        if not file_exists:
-            writer.writeheader()  # Write header if the file is empty
-        
-        writer.writerow(json_data)
-
-    print("Added to csv.")
-
-def refresh_access_token(refresh_token, client_id, client_secret):
-    url = "https://myanimelist.net/v1/oauth2/token"
-
-    payload = {
-        "grant_type": "refresh_token",
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "refresh_token": refresh_token,
-    }
-
-    try:
-        response = requests.post(url, data=payload)
-        response.raise_for_status()
-        token_data = response.json()
-        access_token = token_data["access_token"]
-        refresh_token = token_data["refresh_token"]
-        print("Access Token Refreshed!")
-        return access_token, refresh_token
-    except requests.exceptions.RequestException as e:
-        print("Token Refresh Error:", e)
-
-# Load client ID and client secret from .env file
-client_id = os.getenv("CLIENT_ID")
-client_secret = os.getenv("CLIENT_SECRET")
-
-# Load access token and refresh token from external file
-# with open("tokens.txt", "r") as file:
-#     tokens = file.readlines()
-#     access_token = tokens[0].strip()
-#     refresh_token = tokens[1].strip()
 access_token = os.getenv("ACCESS_TOKEN")
-refresh_token = os.getenv("REFRESH_TOKEN")
+
 
 def fetch_anime_data(id):
     anime_id = id
@@ -91,26 +55,19 @@ def fetch_anime_data(id):
 
 # fetch_anime_data(1)
 
-# Check if access token expired
-# If expired, refresh the access token
-# Update the access token and refresh token with the refreshed values
-# if access_token_expired:
-#     access_token, refresh_token = refresh_access_token(refresh_token, client_id, client_secret)
-
 # Fetch anime data for IDs 1 to 50,000
-animelist_range = (40000, 55869)
+animelist_range = (30000, 55869)
 
 for anime_id in range(animelist_range[0], animelist_range[1]):
-    anime_data = fetch_anime_data(anime_id)
     print(f'Fetching anime with id {anime_id} ')
-    csv_file = f'animelist_{animelist_range[0]}_{animelist_range[1]}.csv'
+    anime_data = fetch_anime_data(anime_id)
+    file = f'animelist_{animelist_range[0]}_{animelist_range[1]}.jsonl'
     if anime_data:
-        # saves into csv
-        json_to_csv(anime_data, csv_file)
-        
+        # saves into json-lines
+        add_to_json(anime_data, file)
     time.sleep(RATE_LIMIT_DELAY)  # Delay between consecutive requests
 
 
 print(f'Errors: {ERR}, {API_ERR}')
-np.savez("err.npz", array1=np.array(ERR), array2=np.array(API_ERR))
+np.savez("err-30.npz", array1=np.array(ERR), array2=np.array(API_ERR))
 print("Anime data fetching completed.")
