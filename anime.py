@@ -56,7 +56,7 @@ def fetch_anime_data(id):
 # fetch_anime_data(1)
 
 # Fetch anime data for IDs 1 to 50,000
-animelist_range = (30000, 55869)
+animelist_range = (30000, 50000)
 
 for anime_id in range(animelist_range[0], animelist_range[1]):
     print(f'Fetching anime with id {anime_id} ')
