@@ -53,21 +53,64 @@ def fetch_anime_data(id):
         API_ERR.append(id)
         print("API Error:", e)
 
+def fetch_manga_data(id):
+    manga_id = id
+    fields = "id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_volumes,num_chapters,authors{first_name,last_name},pictures,background,related_anime,related_manga,recommendations,serialization"
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+
+    url = f"https://api.myanimelist.net/v2/manga/{manga_id}?fields={fields}"
+
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            response.raise_for_status()
+            anime_data = response.json()
+            # print("Anime Data:", anime_data)
+            # json_data = json.dumps(anime_data, indent=4)
+            return anime_data
+        else:
+            ERR.append(id)
+            print("Error fetching manga data")
+            print(response.status_code)
+    except requests.exceptions.RequestException as e:
+        API_ERR.append(id)
+        print("API Error:", e)
 # fetch_anime_data(1)
 
 # Fetch anime data for IDs 1 to 50,000
-animelist_range = (15000, 30000)
+# animelist_range = (15000, 30000)
 
-for anime_id in range(animelist_range[0], animelist_range[1]):
-    print(f'Fetching anime with id {anime_id} ')
-    anime_data = fetch_anime_data(anime_id)
-    file = f'animelist_{animelist_range[0]}_{animelist_range[1]}.jsonl'
-    if anime_data:
-        # saves into json-lines
-        add_to_json(anime_data, file)
+# for anime_id in range(animelist_range[0], animelist_range[1]):
+#     print(f'Fetching anime with id {anime_id} ')
+#     anime_data = fetch_anime_data(anime_id)
+#     file = f'animelist_{animelist_range[0]}_{animelist_range[1]}.jsonl'
+#     if anime_data:
+#         # saves into json-lines
+#         add_to_json(anime_data, file)
+#     time.sleep(RATE_LIMIT_DELAY)  # Delay between consecutive requests
+
+
+# print(f'Errors: {ERR}, {API_ERR}')
+# np.savez("err-30.npz", array1=np.array(ERR), array2=np.array(API_ERR))
+# print("Anime data fetching completed.")
+
+mangalist_range = (115000, 130000)
+
+for manga_id in range(mangalist_range[0], mangalist_range[1]):
+    print(f'Fetching manga with id {manga_id} ')
+    manga_data = fetch_manga_data(manga_id)
+    file = f'mangalist_{mangalist_range[0]}_{mangalist_range[1]}.jsonl'
+    if manga_data:
+        # saves into csv
+        add_to_json(manga_data, file)
+        
     time.sleep(RATE_LIMIT_DELAY)  # Delay between consecutive requests
 
 
 print(f'Errors: {ERR}, {API_ERR}')
-np.savez("err-30.npz", array1=np.array(ERR), array2=np.array(API_ERR))
-print("Anime data fetching completed.")
+np.savez("Merr.npz", array1=np.array(ERR), array2=np.array(API_ERR))
+print("Manga data fetching completed.")
