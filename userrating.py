@@ -37,7 +37,7 @@ def fetch_user_anime_list(username):
         if anime_response.status_code == 200:
             anime_data = anime_response.json()
             anime_ratings = [entry["list_status"]["score"] for entry in anime_data["data"]]
-            print("Anime Ratings:", anime_ratings)
+            # print("Anime Ratings:", anime_ratings)
             return {"user": username, "data": anime_data["data"]}
         else:
             ERR.append(username)
@@ -61,7 +61,7 @@ def fetch_user_manga_list(username):
         if manga_response.status_code == 200:
             manga_data = manga_response.json()
             manga_ratings = [entry["list_status"]["score"] for entry in manga_data["data"]]
-            print("Manga Ratings:", manga_ratings)
+            # print("Manga Ratings:", manga_ratings)
             return {"user": username, "data": manga_data["data"]}
         else:
             ERR.append(username)
@@ -71,6 +71,7 @@ def fetch_user_manga_list(username):
         print("API Error:", e)
 
 def process_user(username):
+    print(f'fetching {username}')
     anime_list_status = fetch_user_anime_list(username)
     time.sleep(RATE_LIMIT_DELAY)  # Delay between consecutive requests
     manga_list_status = fetch_user_manga_list(username)
@@ -85,10 +86,10 @@ def process_user(username):
 # Load the JSON file
 with open('users/batch_1.json', 'r') as file:
     batch_data = json.load(file)
-for username in batch_data:
+for index, username in enumerate(batch_data['usernames'],1):
     process_user(username)
+    print(f"Processed {index} usernames")
 
-    
 print(f'Errors: {ERR}, {API_ERR}')
 np.savez("UMerr.npz", array1=np.array(ERR), array2=np.array(API_ERR))
 print("Data fetching completed.")
