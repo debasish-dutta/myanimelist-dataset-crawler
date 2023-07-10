@@ -2,6 +2,7 @@ import requests
 from dotenv import load_dotenv
 import json
 import time
+import os
 import numpy as np
 
 load_dotenv()
