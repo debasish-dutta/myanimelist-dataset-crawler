@@ -2,6 +2,7 @@ import requests
 from dotenv import load_dotenv
 import json
 import time
+import numpy as np
 
 load_dotenv()
 
@@ -11,10 +12,7 @@ API_ERR = []
 ERR = []
 
 # Load access token and refresh token from external file
-with open("tokens.txt", "r") as file:
-    tokens = file.readlines()
-    access_token = tokens[0].strip()
-    refresh_token = tokens[1].strip()
+access_token = os.getenv("ACCESS_TOKEN")
 
 def add_to_json(json_obj, file):
     # Convert the JSON object to a string
@@ -89,3 +87,8 @@ with open('users/batch_1.json', 'r') as file:
     batch_data = json.load(file)
 for username in batch_data:
     process_user(username)
+
+    
+print(f'Errors: {ERR}, {API_ERR}')
+np.savez("UMerr.npz", array1=np.array(ERR), array2=np.array(API_ERR))
+print("Data fetching completed.")
